@@ -2,11 +2,8 @@ class ConnectFour:
 	width = 7
 	height = 6
 	
-	def __init__(self, parent=None, move=None):
+	def __init__(self, parent=None):
 		self.position_to_disc = {} if parent is None else dict(parent.position_to_disc)
-		self.move = move
-		if self.move is not None:
-			self.place_disc(self.move)
 	
 	def place_disc(self, column):
 		if column < 0 or column >= ConnectFour.width:
@@ -77,11 +74,16 @@ class ConnectFour:
 	
 	def get_state_as_string(self):
 		symbols = ["X", "O"]
-		s = ""
+		state = ""
+		state_mirrored = ""
 		for y in range(ConnectFour.height-1, -1, -1):
 			for x in range(ConnectFour.width):
 				try:
-					s += symbols[self.position_to_disc[(x,y)]]
+					state += symbols[self.position_to_disc[(x,y)]]
 				except KeyError:
-					s += "."
-		return s
+					state += "."
+				try:
+					state_mirrored += symbols[self.position_to_disc[(ConnectFour.width-1-x,y)]]
+				except KeyError:
+					state_mirrored += "."
+		return state if state < state_mirrored else state_mirrored

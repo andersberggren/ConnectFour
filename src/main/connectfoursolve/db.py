@@ -13,10 +13,10 @@ def connect_to_db(*, host="localhost", database="pytestdb", user="pyuser", passw
 		raise err
 	return db_connection
 
-def get_value_of_state(db, successor_state):
+def get_value_of_state(db, state):
 	cursor = db.cursor()
 	sql = "select value from connectfour where state = %s"
-	cursor.execute(sql, (successor_state,))
+	cursor.execute(sql, (state,))
 	row = cursor.fetchone()
 	return row[0] if row is not None else None
 

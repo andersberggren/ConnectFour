@@ -6,7 +6,6 @@ class TestSuite(unittest.TestCase):
 	def test_init(self):
 		cf = ConnectFour()
 		self.assertEqual(len(cf.position_to_disc), 0)
-		self.assertIsNone(cf.move)
 		self.assertEqual(cf.get_current_player(), 0)
 		self.assertIsNone(cf.get_winner())
 		self.assertEqual(ConnectFour.width, 7)
