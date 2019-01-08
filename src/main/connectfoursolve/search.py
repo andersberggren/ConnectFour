@@ -1,4 +1,3 @@
-import connectfoursolve
 from connectfoursolve.db import get_value_of_state
 
 alpha_default = -1000000000
@@ -18,7 +17,7 @@ class AlphaBeta:
 	def alphabeta(self, node, depth, maximizing_player, alpha=alpha_default, beta=beta_default):
 		value_from_db = self.get_heuristic_value_from_database(node)
 		if value_from_db is not None:
-			print("Returning heuristic value from database:", value_from_db)
+			#print("Returning heuristic value from database:", value_from_db)
 			return value_from_db
 		if node.is_terminal_node():
 			node_state = node.get_state()
@@ -28,28 +27,21 @@ class AlphaBeta:
 			return value
 		if depth == 0:
 			return node.get_heuristic_value()
-		if maximizing_player:
-			value = alpha_default
-			for child_node in node.get_successors():
-				child_value = self.alphabeta(child_node, depth-1, False, alpha, beta)
-				if abs(child_value) >= 1000000:
-					child_node_state = child_node.get_state()
-					self.node_state_to_heuristic_value[child_node_state] = child_value
+		
+		value = alpha_default if maximizing_player else beta_default
+		for child_node in node.get_successors():
+			child_value = self.alphabeta(child_node, depth-1, not maximizing_player, alpha, beta)
+			if abs(child_value) >= 1000000:
+				child_node_state = child_node.get_state()
+				self.node_state_to_heuristic_value[child_node_state] = child_value
+			if maximizing_player:
 				value = max(value, child_value)
 				alpha = max(alpha, value)
-				if alpha >= beta:
-					break
-		else:
-			value = beta_default
-			for child_node in node.get_successors():
-				child_value = self.alphabeta(child_node, depth-1, True, alpha, beta)
-				if abs(child_value) >= 1000000:
-					child_node_state = child_node.get_state()
-					self.node_state_to_heuristic_value[child_node_state] = child_value
+			else:
 				value = min(value, child_value)
-				alpha = min(alpha, value)
-				if alpha >= beta:
-					break
+				beta = min(beta, value)
+			if alpha >= beta:
+				break
 		return value
 	
 	def get_heuristic_value_from_database(self, node):
