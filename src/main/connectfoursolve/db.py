@@ -13,15 +13,21 @@ def connect_to_db(*, host="localhost", database="pytestdb", user="pyuser", passw
 		raise err
 	return db_connection
 
-def get_value_of_state(db, state):
+def get_value_of_state(db, successor_state):
 	cursor = db.cursor()
-	sql = "select value from connectfoursolve where state = %s" 
-	cursor.execute(sql, (state,))
+	sql = "select value from connectfour where state = %s"
+	cursor.execute(sql, (successor_state,))
 	row = cursor.fetchone()
 	return row[0] if row is not None else None
 
-def set_value_of_state(db, state, value):
+def set_value_of_state(db, state, value, move):
 	cursor = db.cursor()
-	sql = "insert into connectfoursolve (state, value) values (%s, %s)"
-	cursor.execute(sql, (state, value))
+	sql = "insert into connectfour (state, value, move) values (%s, %s, %s)"
+	cursor.execute(sql, (state, value, move))
 	db.commit()
+
+def get_number_of_rows(db):
+	cursor = db.cursor()
+	sql = "select * from connectfour"
+	cursor.execute(sql)
+	return len(cursor.fetchall())

@@ -5,11 +5,12 @@ class SearchNode:
 		self.cf = cf
 	
 	def get_successors(self):
+		if self.cf.get_winner() is not None:
+			return []
 		successors = []
 		for i in range(ConnectFour.width):
-			successor_cf = ConnectFour(self.cf)
 			try:
-				successor_cf.place_disc(i)
+				successor_cf = ConnectFour(self.cf, i)
 				successors.append(SearchNode(successor_cf))
 			except ValueError:
 				pass
