@@ -7,15 +7,29 @@ def do_alphabeta(db_connection):
 	initial_node = SearchNode(ConnectFour())
 	alphabeta = AlphaBeta(db_connection=db_connection)
 	for child_node in initial_node.get_successors():
-		value = alphabeta.alphabeta(child_node, 7, False)
+		value = alphabeta.alphabeta(child_node, 42, False)
 		print("Child node:")
 		print(child_node.cf.to_human_readable_string())
 		print("Value:", value)
-	#print("Terminal nodes:", alphabeta.n_terminal_nodes)
-	#print("Unique:", len(alphabeta.node_state_to_heuristic_value))
-	#for (state, value) in alphabeta.node_state_to_heuristic_value.items():
-	#	if get_value_of_state(db_connection, state) is None:
-	#		set_value_of_state(db_connection, state, value, -1)
+
+def print_database(db_connection):
+	cursor = db_connection.cursor()
+	cursor.execute("select * from connectfour")
+	#cursor.execute("select distinct value from connectfour order by value")
+	i = 0
+	for (state, value, move) in cursor:
+		print("Row:", i, "State:", state, "Value:", value)
+		cf = ConnectFour()
+		for x in range(ConnectFour.width):
+			column_as_hex_string = state[x*2:x*2+2]
+			column_as_bin_string = bin(int(column_as_hex_string, 16))[2:]
+			for y in range(len(column_as_bin_string)-1):
+				player = int(column_as_bin_string[-1-y])
+				cf.position_to_disc[(x,y)] = player
+		print(cf.to_human_readable_string())
+		i += 1
+		if i == 100:
+			break
 
 if __name__ == "__main__":
 	db_connection = connect_to_db()
@@ -24,3 +38,4 @@ if __name__ == "__main__":
 	print("Number of rows in connectfour: ", get_number_of_rows(db_connection))
 	do_alphabeta(db_connection)
 	print("Number of rows in connectfour: ", get_number_of_rows(db_connection))
+	#print_database(db_connection)

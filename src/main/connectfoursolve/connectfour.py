@@ -5,6 +5,7 @@ class ConnectFour:
 	def __init__(self, parent=None):
 		self.position_to_disc = {} if parent is None else dict(parent.position_to_disc)
 		self.heuristic = Heuristic(self)
+		self.heuristic_value = None
 	
 	def place_disc(self, column):
 		if column < 0 or column >= ConnectFour.width:
@@ -66,7 +67,9 @@ class ConnectFour:
 		return None
 	
 	def get_heuristic_value(self):
-		return self.heuristic.get_heuristic_value()
+		if self.heuristic_value is None:
+			self.heuristic_value = self.heuristic.get_heuristic_value()
+		return self.heuristic_value
 	
 	def to_string(self):
 		column_strings = []
@@ -109,24 +112,25 @@ class Heuristic:
 	def get_heuristic_value(self):
 		winner = self.cf.get_winner()
 		if winner is not None:
-			value = 1000000 + ConnectFour.width*ConnectFour.height - len(self.cf.position_to_disc)
-			return value if winner == 0 else -value
+			return self.get_heuristic_value_for_win(winner, len(self.cf.position_to_disc))
 		player_threat_list = self.get_threats()
 		current_player = self.cf.get_current_player()
 		opponent = 1 - current_player
 		# If current player has an immediate threat, current player will win in 1 move.
 		if len(player_threat_list[current_player][0]) > 0:
-			print("Current player has an immediate threat. Will win in 1 move.")
+			#print("Current player has an immediate threat. Will win in 1 move.")
 			return self.get_heuristic_value_for_win(current_player, len(self.cf.position_to_disc)+1)
 		# If opponent has more than one immediate threat, opponent will win in 2 moves.
 		opponent_immediate_threats = player_threat_list[opponent][0]
 		opponent_threats = player_threat_list[opponent][1]
 		if len(opponent_immediate_threats) > 1:
-			print("Opponent has {} immediate threats and will win in 2 moves.".format(
-					len(opponent_immediate_threats)))
+			#print("Opponent has {} immediate threats and will win in 2 moves.".format(
+			#		len(opponent_immediate_threats)))
 			return self.get_heuristic_value_for_win(opponent, len(self.cf.position_to_disc)+2)
+		# If opponent has an immediate and a non-immediate threat in the same column,
+		# opponent will win in 2 moves.
 		if any(t1 == t2 for t1 in opponent_immediate_threats for t2 in opponent_threats):
-			print("Opponent has both an immediate and a non-immediate threat in the same column.")
+			#print("Opponent has both an immediate and a non-immediate threat in the same column.")
 			return self.get_heuristic_value_for_win(opponent, len(self.cf.position_to_disc)+2)
 		return 0
 	
