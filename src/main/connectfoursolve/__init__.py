@@ -4,11 +4,16 @@ from connectfoursolve.search import AlphaBeta
 from connectfoursolve.searchnode import SearchNode
 
 def print_cf(cf):
-	s = cf.get_state_as_string()
-	while len(s) > 0:
-		row = s[:ConnectFour.width]
-		s = s[ConnectFour.width:]
-		print(row)
+	player_to_symbol = {0: "X", 1: "O"}
+	for y in range(ConnectFour.height-1, -1, -1):
+		for x in range(ConnectFour.width):
+			symbol = "."
+			try:
+				symbol = player_to_symbol[cf.position_to_disc[(x,y)]]
+			except KeyError:
+				pass
+			print(symbol, end="")
+		print()
 	print("Winner:", cf.get_winner())
 
 def do_alphabeta(db_connection):
@@ -19,8 +24,8 @@ def do_alphabeta(db_connection):
 		print("Child node:")
 		print_cf(child_node.cf)
 		print("Value:", value)
-	print("Terminal nodes:", alphabeta.n_terminal_nodes)
-	print("Unique:", len(alphabeta.node_state_to_heuristic_value))
+	#print("Terminal nodes:", alphabeta.n_terminal_nodes)
+	#print("Unique:", len(alphabeta.node_state_to_heuristic_value))
 	#for (state, value) in alphabeta.node_state_to_heuristic_value.items():
 	#	if get_value_of_state(db_connection, state) is None:
 	#		set_value_of_state(db_connection, state, value, -1)

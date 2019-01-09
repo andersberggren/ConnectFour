@@ -73,17 +73,20 @@ class ConnectFour:
 			return 0
 	
 	def get_state_as_string(self):
-		symbols = ["X", "O"]
-		state = ""
-		state_mirrored = ""
-		for y in range(ConnectFour.height-1, -1, -1):
-			for x in range(ConnectFour.width):
+		column_strings = []
+		for x in range(ConnectFour.width):
+			column_height = 0
+			column_value = 0
+			for y in range(ConnectFour.height-1, -1, -1):
+				position = (x,y)
 				try:
-					state += symbols[self.position_to_disc[(x,y)]]
+					disc_value = self.position_to_disc[position]
+					column_height = max(column_height, y+1)
+					column_value = (column_value<<1) + disc_value
 				except KeyError:
-					state += "."
-				try:
-					state_mirrored += symbols[self.position_to_disc[(ConnectFour.width-1-x,y)]]
-				except KeyError:
-					state_mirrored += "."
-		return state if state < state_mirrored else state_mirrored
+					pass
+			column_value += 1<<column_height
+			column_strings.append("{0:02x}".format(column_value))
+		cf_string = "".join(column_strings)
+		cf_mirrored_string = "".join([x for x in reversed(column_strings)])
+		return min(cf_string, cf_mirrored_string)
