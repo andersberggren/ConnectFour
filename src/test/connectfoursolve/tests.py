@@ -65,11 +65,7 @@ class TestSuite(unittest.TestCase):
 			"..OO...",
 			".OXXXX.",
 		]
-		cf = string_list_to_connect_four(string_list)
-		self.assertEqual(len(cf.position_to_disc), 7)
-		self.assertEqual(cf.get_current_player(), 1)
-		self.assertEqual(cf.get_heuristic_value(), 1000042-7)
-		self.assertEqual(cf.get_state_as_string(), "".join(string_list))
+		self.asserts_for_heuristic_value(string_list, 7, 1, 1000042-7)
 		string_list = [
 			".......",
 			".......",
@@ -78,11 +74,14 @@ class TestSuite(unittest.TestCase):
 			"O..XX..",
 			"O..XX..",
 		]
-		cf = string_list_to_connect_four(string_list)
-		self.assertEqual(len(cf.position_to_disc), 8)
-		self.assertEqual(cf.get_current_player(), 0)
-		self.assertEqual(cf.get_heuristic_value(), -1000042+8)
-		self.assertEqual(cf.get_state_as_string(), "".join(string_list))
+		self.asserts_for_heuristic_value(string_list, 8, 0, -1000042+8)
+	
+	def asserts_for_heuristic_value(self, cf_as_string_list, number_of_discs, current_player,
+	                                heuristic_value):
+		cf = string_list_to_connect_four(cf_as_string_list)
+		self.assertEqual(len(cf.position_to_disc), number_of_discs)
+		self.assertEqual(cf.get_current_player(), current_player)
+		self.assertEqual(cf.get_heuristic_value(), heuristic_value)
 
 def string_list_to_connect_four(string_list):
 	symbol_to_player = {"X": 0, "O": 1}
