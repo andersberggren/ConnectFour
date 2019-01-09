@@ -24,4 +24,4 @@ class SearchNode:
 		return successors
 	
 	def get_state(self):
-		return self.cf.get_state_as_string()
+		return self.cf.to_string()

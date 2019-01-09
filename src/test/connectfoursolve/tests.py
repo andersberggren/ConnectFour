@@ -56,7 +56,7 @@ class TestSuite(unittest.TestCase):
 		except ValueError:
 			pass
 	
-	def test_get_heuristic_value(self):
+	def test_get_heuristic_value_win(self):
 		# Horizontal win for player 0 (X)
 		string_list = [
 			".......",
@@ -157,6 +157,55 @@ class TestSuite(unittest.TestCase):
 			"..OOXOX",
 		]
 		self.asserts_for_heuristic_value(string_list, 11, 1, 1000042-11)
+	
+	def test_get_heuristic_value_almost_win(self):
+		string_list = [
+			".......",
+			".......",
+			".......",
+			".......",
+			"..OOO..",
+			"..XXX..",
+		]
+		self.asserts_for_heuristic_value(string_list, 6, 0, 1000042-7)
+		string_list = [
+			".......",
+			".......",
+			".......",
+			".......",
+			"XX.....",
+			"XX..OOO",
+		]
+		self.asserts_for_heuristic_value(string_list, 7, 1, -1000042+8)
+		string_list = [
+			".......",
+			".......",
+			".......",
+			".......",
+			"..OO...",
+			".XXX...",
+		]
+		self.asserts_for_heuristic_value(string_list, 5, 1, 1000042-7)
+		string_list = [
+			".......",
+			".......",
+			".......",
+			".......",
+			"X......",
+			"XX.OOO.",
+		]
+		self.asserts_for_heuristic_value(string_list, 6, 0, -1000042+8)
+		string_list = [
+			".......",
+			".......",
+			"..X..X.",
+			"..O?XO.",
+			"..O?XO.",
+			".XXOOX.",
+		]
+		self.asserts_for_heuristic_value(string_list, 13, 1, 1000042-15)
+	
+	def test_get_heuristic_value_no_win(self):
 		# No win
 		string_list = [
 			".......",
@@ -168,12 +217,13 @@ class TestSuite(unittest.TestCase):
 		]
 		self.asserts_for_heuristic_value(string_list, 14, 0, 0)
 
-	
 	def asserts_for_heuristic_value(self, cf_as_string_list, number_of_discs, current_player,
 	                                heuristic_value):
 		cf = string_list_to_connect_four(cf_as_string_list)
 		self.assertEqual(len(cf.position_to_disc), number_of_discs)
 		self.assertEqual(cf.get_current_player(), current_player)
+		#print("Get heuristic value for:")
+		#print(cf.to_human_readable_string())
 		self.assertEqual(cf.get_heuristic_value(), heuristic_value)
 
 def string_list_to_connect_four(string_list):

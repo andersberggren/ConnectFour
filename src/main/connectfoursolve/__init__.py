@@ -3,26 +3,13 @@ from connectfoursolve.db import connect_to_db, get_value_of_state, set_value_of_
 from connectfoursolve.search import AlphaBeta
 from connectfoursolve.searchnode import SearchNode
 
-def print_cf(cf):
-	player_to_symbol = {0: "X", 1: "O"}
-	for y in range(ConnectFour.height-1, -1, -1):
-		for x in range(ConnectFour.width):
-			symbol = "."
-			try:
-				symbol = player_to_symbol[cf.position_to_disc[(x,y)]]
-			except KeyError:
-				pass
-			print(symbol, end="")
-		print()
-	print("Winner:", cf.get_winner())
-
 def do_alphabeta(db_connection):
 	initial_node = SearchNode(ConnectFour())
 	alphabeta = AlphaBeta(db_connection=db_connection)
 	for child_node in initial_node.get_successors():
 		value = alphabeta.alphabeta(child_node, 7, False)
 		print("Child node:")
-		print_cf(child_node.cf)
+		print(child_node.cf.to_human_readable_string())
 		print("Value:", value)
 	#print("Terminal nodes:", alphabeta.n_terminal_nodes)
 	#print("Unique:", len(alphabeta.node_state_to_heuristic_value))

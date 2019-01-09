@@ -51,7 +51,7 @@ class AlphaBeta:
 	def get_heuristic_value_from_database(self, node):
 		if self.db_connection is None:
 			return None
-		return get_value_of_state(self.db_connection, node.cf.get_state_as_string())
+		return get_value_of_state(self.db_connection, node.cf.to_string())
 	
 	def set_heuristic_value(self, state, value):
 		if self.db_connection is None:
