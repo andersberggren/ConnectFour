@@ -57,6 +57,7 @@ class TestSuite(unittest.TestCase):
 			pass
 	
 	def test_get_heuristic_value(self):
+		# Horizontal win for player 0 (X)
 		string_list = [
 			".......",
 			".......",
@@ -66,6 +67,7 @@ class TestSuite(unittest.TestCase):
 			".OXXXX.",
 		]
 		self.asserts_for_heuristic_value(string_list, 7, 1, 1000042-7)
+		# Vertical win for player 1 (O)
 		string_list = [
 			".......",
 			".......",
@@ -75,6 +77,97 @@ class TestSuite(unittest.TestCase):
 			"O..XX..",
 		]
 		self.asserts_for_heuristic_value(string_list, 8, 0, -1000042+8)
+		# Diagonal (/) top-left
+		string_list = [
+			"...O...",
+			"..OX...",
+			".OXO...",
+			"OXOX...",
+			"OXXO...",
+			"XXOX...",
+		]
+		self.asserts_for_heuristic_value(string_list, 18, 0, -1000042+18)
+		# Diagonal (\) top-right
+		string_list = [
+			"...O...",
+			"...XO..",
+			"...OXO.",
+			"...XOXO",
+			"...OXXO",
+			"...XOXX",
+		]
+		self.asserts_for_heuristic_value(string_list, 18, 0, -1000042+18)
+		# Diagonal (\) top-left
+		string_list = [
+			"X......",
+			"XX.....",
+			"OXX....",
+			"XOOX...",
+			"OXXO...",
+			"OOOXO..",
+		]
+		self.asserts_for_heuristic_value(string_list, 19, 1, 1000042-19)
+		# Diagonal (/) top-right
+		string_list = [
+			"......X",
+			".....XX",
+			"....XXO",
+			"...XOOX",
+			"...OXXO",
+			"..OXOOO",
+		]
+		self.asserts_for_heuristic_value(string_list, 19, 1, 1000042-19)
+		# Diagonal (\) bottom-left
+		string_list = [
+			".......",
+			".......",
+			"O......",
+			"XO.....",
+			"OXO....",
+			"XXXO...",
+		]
+		self.asserts_for_heuristic_value(string_list, 10, 0, -1000042+10)
+		# Diagonal (/) bottom-right
+		string_list = [
+			".......",
+			".......",
+			"......O",
+			".....OX",
+			"....OXO",
+			"...OXXX",
+		]
+		self.asserts_for_heuristic_value(string_list, 10, 0, -1000042+10)
+		# Diagonal (/) bottom-left
+		string_list = [
+			".......",
+			".......",
+			"...X...",
+			"..XX...",
+			".XOO...",
+			"XOXOO..",
+		]
+		self.asserts_for_heuristic_value(string_list, 11, 1, 1000042-11)
+		# Diagonal (\) bottom-right
+		string_list = [
+			".......",
+			".......",
+			"...X...",
+			"...XX..",
+			"...OOX.",
+			"..OOXOX",
+		]
+		self.asserts_for_heuristic_value(string_list, 11, 1, 1000042-11)
+		# No win
+		string_list = [
+			".......",
+			"..X....",
+			"..O....",
+			"..XXO..",
+			"..OOXO.",
+			"..OXXXO",
+		]
+		self.asserts_for_heuristic_value(string_list, 14, 0, 0)
+
 	
 	def asserts_for_heuristic_value(self, cf_as_string_list, number_of_discs, current_player,
 	                                heuristic_value):
