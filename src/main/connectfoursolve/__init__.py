@@ -19,13 +19,7 @@ def print_database(db_connection):
 	i = 0
 	for (state, value, move) in cursor:
 		print("Row:", i, "State:", state, "Value:", value)
-		cf = ConnectFour()
-		for x in range(ConnectFour.width):
-			column_as_hex_string = state[x*2:x*2+2]
-			column_as_bin_string = bin(int(column_as_hex_string, 16))[2:]
-			for y in range(len(column_as_bin_string)-1):
-				player = int(column_as_bin_string[-1-y])
-				cf.position_to_disc[(x,y)] = player
+		cf = ConnectFour.create_from_string(state)
 		print(cf.to_human_readable_string())
 		i += 1
 		if i == 100:
@@ -60,6 +54,11 @@ if __name__ == "__main__":
 	db_connection = connect_to_db()
 	#db_connection.cursor().execute("delete from connectfour")
 	#db_connection.commit()
+	
+	#cf = ConnectFour.create_from_string("010b0703010404")
+	#print(cf.to_human_readable_string())
+	#print(cf.get_heuristic_value())
+	
 	print("Number of rows in connectfour: ", get_number_of_rows(db_connection))
 	#do_alphabeta(db_connection)
 	count_unique_states_at_each_depth(db_connection)

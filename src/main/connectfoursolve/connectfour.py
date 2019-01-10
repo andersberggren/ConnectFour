@@ -112,6 +112,17 @@ class ConnectFour:
 			s += "\n"
 		s = s.rstrip()
 		return s
+	
+	@staticmethod
+	def create_from_string(state):
+		cf = ConnectFour()
+		for x in range(ConnectFour.width):
+			column_as_hex_string = state[x*2:x*2+2]
+			column_as_bin_string = bin(int(column_as_hex_string, 16))[2:]
+			for y in range(len(column_as_bin_string)-1):
+				player = int(column_as_bin_string[-1-y])
+				cf.discs[x][y] = player
+		return cf
 
 class Heuristic:
 	heuristic_value_win_threshold = 1000000
@@ -202,22 +213,20 @@ class Heuristic:
 			(x, y) = (position[0], position[1])
 			while True:
 				(x, y) = (x+direction[0], y+direction[1])
-				try:
-					if self.cf.discs[x][y] == player:
-						in_a_row += 1
-					else:
-						break
-				except IndexError:
+				if x < 0 or x >= ConnectFour.width or y < 0 or y >= ConnectFour.height:
+					break
+				if self.cf.discs[x][y] == player:
+					in_a_row += 1
+				else:
 					break
 			(x, y) = (position[0], position[1])
 			while True:
 				(x, y) = (x-direction[0], y-direction[1])
-				try:
-					if self.cf.discs[x][y] == player:
-						in_a_row += 1
-					else:
-						break
-				except IndexError:
+				if x < 0 or x >= ConnectFour.width or y < 0 or y >= ConnectFour.height:
+					break
+				if self.cf.discs[x][y] == player:
+					in_a_row += 1
+				else:
 					break
 			if in_a_row >= 4:
 				return True

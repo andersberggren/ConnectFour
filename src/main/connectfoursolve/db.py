@@ -28,6 +28,6 @@ def set_value_of_state(db, state, value, move):
 
 def get_number_of_rows(db):
 	cursor = db.cursor()
-	sql = "select * from connectfour"
+	sql = "select count(*) from connectfour"
 	cursor.execute(sql)
-	return len(cursor.fetchall())
+	return int(cursor.fetchone()[0])
