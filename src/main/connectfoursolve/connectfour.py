@@ -137,78 +137,67 @@ class Heuristic:
 		if winner is not None:
 			return self.get_heuristic_value_for_win(winner, 0)
 		
-		player_threat_list = self.get_threats()
+		threats = self.get_threats()
+		immediate_threats = [self.get_immediate_threats(x) for x in threats]
 		current_player = self.cf.get_current_player()
 		opponent = 1 - current_player
 		
 		# If current player has an immediate threat, current player will win in 1 move.
-		if len(player_threat_list[current_player][0]) > 0:
+		if len(self.get_immediate_threats(immediate_threats[current_player])) > 0:
 			#print("Current player has an immediate threat. Will win in 1 move.")
 			return self.get_heuristic_value_for_win(current_player, 1)
 		
 		# If opponent has more than one immediate threat, opponent will win in 2 moves.
-		opponent_immediate_threats = player_threat_list[opponent][0]
-		opponent_threats = player_threat_list[opponent][1]
-		if len(opponent_immediate_threats) > 1:
-			#print("Opponent has {} immediate threats and will win in 2 moves.".format(
-			#		len(opponent_immediate_threats)))
+		if len(immediate_threats[opponent]) > 1:
+			#print("Opponent has more than 1 immediate threat and will win in 2 moves.")
 			return self.get_heuristic_value_for_win(opponent, 2)
 		
-		# If opponent has an immediate and a non-immediate threat in the same column,
-		# opponent will win in 2 moves.
-		if any(t1 == t2 for t1 in opponent_immediate_threats for t2 in opponent_threats):
-			#print("Opponent has both an immediate and a non-immediate threat in the same column.")
-			return self.get_heuristic_value_for_win(opponent, 2)
-		return 0
+		# If opponent has exactly one immediate threat, place a disc in that column,
+		# and get heuristic value for that state.
+		if len(immediate_threats[opponent]) == 1:
+			#print("Opponent has 1 immediate threat. Return the heuristic value of the " \
+			#		+ "state resulting from placing a disc in that column.")
+			cf_successor = ConnectFour(self.cf)
+			column_of_threat = next(iter(immediate_threats[opponent]))[0]
+			cf_successor.place_disc(column_of_threat)
+			return cf_successor.get_heuristic_value()
+		
+		return len(threats[0]) - len(threats[1])
 	
 	def get_heuristic_value_for_win(self, player, number_of_moves_left):
 		value = 1000000 + ConnectFour.width*ConnectFour.height \
 				- (self.cf.get_number_of_discs()+number_of_moves_left)
 		return value if player == 0 else -value
 	
+	def get_immediate_threats(self, threats):
+		immediate_threats = set()
+		for threat in sorted(threats, key=lambda pos: (pos[1],pos[0])):
+			if threat[1] == 0 or self.cf.discs[threat[0]][threat[1]-1] is not None \
+					or (threat[0], threat[1]-1) in immediate_threats:
+				immediate_threats.add(threat)
+		return immediate_threats
+	
 	def get_threats(self):
 		"""
-		Returns a list of:
-		  (list_of_columns_with_immediate_threats, list_of_columns_with_threats).
+		Returns a list of lists with player threats.
 		"""
-		(positions_immediate_threat, positions_threat) = self.get_threat_positions()
 		player_threat_list = []
+		open_positions = [
+			(x,y) for x in range(ConnectFour.width) for y in range(ConnectFour.height)
+			if self.cf.discs[x][y] is None
+		]
 		for player in [0, 1]:
-			player_immediate_threats = []
 			player_threats = []
-			for position in positions_immediate_threat:
+			for position in open_positions:
 				if self.is_threat(position, player):
-					player_immediate_threats.append(position[0])
-			for position in positions_threat:
-				if self.is_threat(position, player):
-					player_threats.append(position[0])
-			player_threat_list.append((player_immediate_threats, player_threats))
+					player_threats.append(position)
+			player_threat_list.append(player_threats)
 		return player_threat_list
 	
-	def get_threat_positions(self):
-		"""
-		Returns (list_of_positions_for_immediate_threats, list_of_positions_for_threats).
-		"""
-		immediate_threats = []
-		threats = []
-		for x in range(ConnectFour.width):
-			position_immediate_threat = None
-			position_threat = None
-			for y in range(ConnectFour.height):
-				position = (x, y)
-				if self.cf.discs[x][y] is None:
-					if position_immediate_threat is None:
-						position_immediate_threat = position
-					elif position_threat is None:
-						position_threat = position
-						break
-			if position_immediate_threat is not None:
-				immediate_threats.append(position_immediate_threat)
-			if position_threat is not None:
-				threats.append(position_threat)
-		return (immediate_threats, threats)
-		
 	def is_threat(self, position, player):
+		"""
+		Returns True iff player "player" would win by placing a disc at position "position".
+		"""
 		directions = [(0,1), (1,0), (1,1), (1,-1)]
 		for direction in directions:
 			in_a_row = 1

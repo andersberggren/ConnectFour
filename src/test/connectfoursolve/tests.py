@@ -210,7 +210,7 @@ class TestSuite(unittest.TestCase):
 			"..OOXO.",
 			"..OXXXO",
 		]
-		self.asserts_for_heuristic_value(string_list, 14, 0, 0)
+		self.asserts_for_heuristic_value(string_list, 14, 0, -1)
 
 	def asserts_for_heuristic_value(self, cf_as_string_list, number_of_discs, current_player,
 	                                heuristic_value):
