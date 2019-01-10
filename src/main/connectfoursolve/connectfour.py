@@ -3,23 +3,34 @@ class ConnectFour:
 	height = 6
 	
 	def __init__(self, parent=None):
-		self.position_to_disc = {} if parent is None else dict(parent.position_to_disc)
+		self.discs = [[None] * ConnectFour.height for x in range(ConnectFour.width)]
+		if parent is not None:
+			for x in range(ConnectFour.width):
+				for y in range(ConnectFour.height):
+					self.discs[x][y] = parent.discs[x][y]
 		self.heuristic = Heuristic(self)
 		self.heuristic_value = None
 	
 	def place_disc(self, column):
 		if column < 0 or column >= ConnectFour.width:
 			raise ValueError("Invalid column: {}".format(column))
-		row_index = 0
-		while (column, row_index) in self.position_to_disc:
-			row_index += 1
-		if row_index < ConnectFour.height:
-			self.position_to_disc[(column, row_index)] = self.get_current_player()
-		else:
-			raise ValueError("Can't place a disc in column {}. It is full.".format(column))
+		for row in range(ConnectFour.height):
+			if self.discs[column][row] is None:
+				self.discs[column][row] = self.get_current_player()
+				return True
+		return False
+	
+	def get_number_of_discs(self):
+		count = 0
+		for x in range(7):
+			for y in range(6):
+				if self.discs[x][y] is not None:
+					count += 1
+		return count
+		#return len([disc for column in self.discs for disc in column if disc is not None])
 	
 	def get_current_player(self):
-		return len(self.position_to_disc) % 2
+		return self.get_number_of_discs() % 2
 	
 	def get_winner(self):
 		# Vertical
@@ -51,7 +62,7 @@ class ConnectFour:
 		discs_in_a_row = 0
 		while x < ConnectFour.width and y < ConnectFour.height:
 			try:
-				this_player = self.position_to_disc[(x,y)]
+				this_player = self.discs[x][y]
 				if this_player == player:
 					discs_in_a_row += 1
 					if discs_in_a_row == 4:
@@ -59,7 +70,7 @@ class ConnectFour:
 				else:
 					player = this_player
 					discs_in_a_row = 1
-			except KeyError:
+			except IndexError:
 				player = None
 				discs_in_a_row = 0
 			x += direction[0]
@@ -77,13 +88,10 @@ class ConnectFour:
 			column_height = 0
 			column_value = 0
 			for y in range(ConnectFour.height-1, -1, -1):
-				position = (x,y)
-				try:
-					disc_value = self.position_to_disc[position]
+				disc_value = self.discs[x][y]
+				if disc_value is not None:
 					column_height = max(column_height, y+1)
 					column_value = (column_value<<1) + disc_value
-				except KeyError:
-					pass
 			column_value += 1<<column_height
 			column_strings.append("{0:02x}".format(column_value))
 		cf_string = "".join(column_strings)
@@ -97,7 +105,7 @@ class ConnectFour:
 			for x in range(ConnectFour.width):
 				symbol = "."
 				try:
-					symbol = player_to_symbol[self.position_to_disc[(x,y)]]
+					symbol = player_to_symbol[self.discs[x][y]]
 				except KeyError:
 					pass
 				s += symbol
@@ -112,30 +120,35 @@ class Heuristic:
 	def get_heuristic_value(self):
 		winner = self.cf.get_winner()
 		if winner is not None:
-			return self.get_heuristic_value_for_win(winner, len(self.cf.position_to_disc))
+			return self.get_heuristic_value_for_win(winner, 0)
+		
 		player_threat_list = self.get_threats()
 		current_player = self.cf.get_current_player()
 		opponent = 1 - current_player
+		
 		# If current player has an immediate threat, current player will win in 1 move.
 		if len(player_threat_list[current_player][0]) > 0:
 			#print("Current player has an immediate threat. Will win in 1 move.")
-			return self.get_heuristic_value_for_win(current_player, len(self.cf.position_to_disc)+1)
+			return self.get_heuristic_value_for_win(current_player, 1)
+		
 		# If opponent has more than one immediate threat, opponent will win in 2 moves.
 		opponent_immediate_threats = player_threat_list[opponent][0]
 		opponent_threats = player_threat_list[opponent][1]
 		if len(opponent_immediate_threats) > 1:
 			#print("Opponent has {} immediate threats and will win in 2 moves.".format(
 			#		len(opponent_immediate_threats)))
-			return self.get_heuristic_value_for_win(opponent, len(self.cf.position_to_disc)+2)
+			return self.get_heuristic_value_for_win(opponent, 2)
+		
 		# If opponent has an immediate and a non-immediate threat in the same column,
 		# opponent will win in 2 moves.
 		if any(t1 == t2 for t1 in opponent_immediate_threats for t2 in opponent_threats):
 			#print("Opponent has both an immediate and a non-immediate threat in the same column.")
-			return self.get_heuristic_value_for_win(opponent, len(self.cf.position_to_disc)+2)
+			return self.get_heuristic_value_for_win(opponent, 2)
 		return 0
 	
-	def get_heuristic_value_for_win(self, player, number_of_moves):
-		value = 1000000 + ConnectFour.width*ConnectFour.height - number_of_moves
+	def get_heuristic_value_for_win(self, player, number_of_moves_left):
+		value = 1000000 + ConnectFour.width*ConnectFour.height \
+				- (self.cf.get_number_of_discs()+number_of_moves_left)
 		return value if player == 0 else -value
 	
 	def get_threats(self):
@@ -168,7 +181,7 @@ class Heuristic:
 			position_threat = None
 			for y in range(ConnectFour.height):
 				position = (x, y)
-				if position not in self.cf.position_to_disc:
+				if self.cf.discs[x][y] is None:
 					if position_immediate_threat is None:
 						position_immediate_threat = position
 					elif position_threat is None:
@@ -181,30 +194,28 @@ class Heuristic:
 		return (immediate_threats, threats)
 		
 	def is_threat(self, position, player):
-		if position is None:
-			return False
 		directions = [(0,1), (1,0), (1,1), (1,-1)]
 		for direction in directions:
 			in_a_row = 1
-			position_iter = position
+			(x, y) = (position[0], position[1])
 			while True:
-				position_iter = (position_iter[0]+direction[0], position_iter[1]+direction[1])
+				(x, y) = (x+direction[0], y+direction[1])
 				try:
-					if self.cf.position_to_disc[position_iter] == player:
+					if self.cf.discs[x][y] == player:
 						in_a_row += 1
 					else:
 						break
-				except KeyError:
+				except IndexError:
 					break
-			position_iter = position
+			(x, y) = (position[0], position[1])
 			while True:
-				position_iter = (position_iter[0]-direction[0], position_iter[1]-direction[1])
+				(x, y) = (x-direction[0], y-direction[1])
 				try:
-					if self.cf.position_to_disc[position_iter] == player:
+					if self.cf.discs[x][y] == player:
 						in_a_row += 1
 					else:
 						break
-				except KeyError:
+				except IndexError:
 					break
 			if in_a_row >= 4:
 				return True

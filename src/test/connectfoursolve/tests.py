@@ -5,7 +5,7 @@ from connectfoursolve.connectfour import ConnectFour
 class TestSuite(unittest.TestCase):
 	def test_init(self):
 		cf = ConnectFour()
-		self.assertEqual(len(cf.position_to_disc), 0)
+		self.assertEqual(cf.get_number_of_discs(), 0)
 		self.assertEqual(cf.get_current_player(), 0)
 		self.assertIsNone(cf.get_winner())
 		self.assertEqual(ConnectFour.width, 7)
@@ -27,14 +27,13 @@ class TestSuite(unittest.TestCase):
 		]
 		cf = ConnectFour()
 		for i in range(len(positions)):
-			position = positions[i]
-			column = position[0]
-			cf.place_disc(column)
-			self.assertEqual(len(cf.position_to_disc), i+1)
-			self.assertEqual(cf.position_to_disc[position], i % 2)
+			(x,y) = positions[i]
+			self.assertTrue(cf.place_disc(x))
+			self.assertEqual(cf.get_number_of_discs(), i+1)
+			self.assertEqual(cf.discs[x][y], i % 2)
 			self.assertEqual(cf.get_current_player(), (i+1) % 2)
 			self.assertIsNone(cf.get_winner())
-		cf.place_disc(2)
+		self.assertTrue(cf.place_disc(2))
 		self.assertEqual(cf.get_winner(), 0)
 		
 		cf = ConnectFour()
@@ -49,12 +48,8 @@ class TestSuite(unittest.TestCase):
 		except ValueError:
 			pass
 		for i in range(ConnectFour.height):
-			cf.place_disc(4)
-		try:
-			cf.place_disc(4)
-			self.fail("Expected ValueError")
-		except ValueError:
-			pass
+			self.assertTrue(cf.place_disc(4))
+		self.assertFalse(cf.place_disc(4))
 	
 	def test_get_heuristic_value_win(self):
 		# Horizontal win for player 0 (X)
@@ -220,7 +215,7 @@ class TestSuite(unittest.TestCase):
 	def asserts_for_heuristic_value(self, cf_as_string_list, number_of_discs, current_player,
 	                                heuristic_value):
 		cf = string_list_to_connect_four(cf_as_string_list)
-		self.assertEqual(len(cf.position_to_disc), number_of_discs)
+		self.assertEqual(cf.get_number_of_discs(), number_of_discs)
 		self.assertEqual(cf.get_current_player(), current_player)
 		#print("Get heuristic value for:")
 		#print(cf.to_human_readable_string())
@@ -234,7 +229,7 @@ def string_list_to_connect_four(string_list):
 		for x in range(ConnectFour.width):
 			symbol = line[x]
 			try:
-				cf.position_to_disc[(x,y)] = symbol_to_player[symbol]
+				cf.discs[x][y] = symbol_to_player[symbol]
 			except KeyError:
 				pass
 	return cf

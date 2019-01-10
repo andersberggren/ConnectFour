@@ -6,7 +6,7 @@ class SearchNode:
 	
 	def is_terminal_node(self):
 		return self.cf.get_winner() is not None \
-				or len(self.cf.position_to_disc) == ConnectFour.width*ConnectFour.height
+				or self.cf.get_number_of_discs() == ConnectFour.width*ConnectFour.height
 	
 	def get_heuristic_value(self):
 		return self.cf.get_heuristic_value()
@@ -16,12 +16,9 @@ class SearchNode:
 			return []
 		successors = []
 		for i in range(ConnectFour.width):
-			try:
-				successor_cf = ConnectFour(self.cf)
-				successor_cf.place_disc(i)
+			successor_cf = ConnectFour(self.cf)
+			if successor_cf.place_disc(i):
 				successors.append(SearchNode(successor_cf))
-			except ValueError:
-				pass
 		return successors
 	
 	def get_state(self):
