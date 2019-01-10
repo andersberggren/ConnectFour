@@ -27,7 +27,6 @@ class ConnectFour:
 				if self.discs[x][y] is not None:
 					count += 1
 		return count
-		#return len([disc for column in self.discs for disc in column if disc is not None])
 	
 	def get_current_player(self):
 		return self.get_number_of_discs() % 2
@@ -60,19 +59,22 @@ class ConnectFour:
 		y = y_start
 		player = None
 		discs_in_a_row = 0
-		while x < ConnectFour.width and y < ConnectFour.height:
-			try:
+		while not (x < 0 and direction[0] < 0) \
+				and not (x >= ConnectFour.width and direction[0] > 0) \
+				and not (y < 0 and direction[1] < 0) \
+				and not (y >= ConnectFour.height and direction[1] > 0):
+			if x >= 0 and x < ConnectFour.width and y >= 0 and y < ConnectFour.height:
 				this_player = self.discs[x][y]
-				if this_player == player:
+				if this_player is None:
+					player = None
+					discs_in_a_row = 0
+				elif this_player == player:
 					discs_in_a_row += 1
 					if discs_in_a_row == 4:
 						return player
 				else:
 					player = this_player
 					discs_in_a_row = 1
-			except IndexError:
-				player = None
-				discs_in_a_row = 0
 			x += direction[0]
 			y += direction[1]
 		return None
