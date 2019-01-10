@@ -22,7 +22,7 @@ def get_value_of_state(db, state):
 
 def set_value_of_state(db, state, value, move):
 	cursor = db.cursor()
-	sql = "insert into connectfour (state, value, move) values (%s, %s, %s)"
+	sql = "replace into connectfour (state, value, move) values (%s, %s, %s)"
 	cursor.execute(sql, (state, value, move))
 	db.commit()
 
@@ -31,3 +31,15 @@ def get_number_of_rows(db):
 	sql = "select count(*) from connectfour"
 	cursor.execute(sql)
 	return int(cursor.fetchone()[0])
+
+def add_fringe(db, states, depth):
+	cursor = db.cursor()
+	sql = "replace into fringe (state, depth) values (%s, %s)"
+	cursor.executemany(sql, [(state, depth) for state in states])
+	db.commit()
+
+def get_fringe(db):
+	cursor = db.cursor()
+	sql = "select state, depth from fringe where depth in (select max(depth) from fringe)"
+	cursor.execute(sql)
+	return cursor
