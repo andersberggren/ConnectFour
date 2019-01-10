@@ -114,6 +114,8 @@ class ConnectFour:
 		return s
 
 class Heuristic:
+	heuristic_value_win_threshold = 1000000
+	
 	def __init__(self, connect_four):
 		self.cf = connect_four
 	

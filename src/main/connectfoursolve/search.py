@@ -1,8 +1,8 @@
 from connectfoursolve.db import get_value_of_state, set_value_of_state
+from connectfoursolve.connectfour import Heuristic
 
 alpha_default = -1000000000
 beta_default  =  1000000000
-heuristic_value_win_threshold = 1000000
 
 # SearchNode needs the following methods:
 # - is_terminal_node()
@@ -33,7 +33,7 @@ class AlphaBeta:
 		value = alpha_default if maximizing_player else beta_default
 		for child_node in node.get_successors():
 			child_value = self.alphabeta(child_node, depth-1, not maximizing_player, alpha, beta)
-			if abs(child_value) >= heuristic_value_win_threshold:
+			if abs(child_value) >= Heuristic.heuristic_value_win_threshold:
 				child_node_state = child_node.get_state()
 				#self.node_state_to_heuristic_value[child_node_state] = child_value
 				#self.n_terminal_nodes += 1

@@ -1,4 +1,4 @@
-from connectfoursolve.connectfour import ConnectFour
+from connectfoursolve.connectfour import ConnectFour, Heuristic
 from connectfoursolve.db import connect_to_db, get_value_of_state, set_value_of_state, get_number_of_rows
 from connectfoursolve.search import AlphaBeta
 from connectfoursolve.searchnode import SearchNode
@@ -7,7 +7,7 @@ def do_alphabeta(db_connection):
 	initial_node = SearchNode(ConnectFour())
 	alphabeta = AlphaBeta(db_connection=db_connection)
 	for child_node in initial_node.get_successors():
-		value = alphabeta.alphabeta(child_node, 42, False)
+		value = alphabeta.alphabeta(child_node, 7, False)
 		print("Child node:")
 		print(child_node.cf.to_human_readable_string())
 		print("Value:", value)
@@ -31,11 +31,37 @@ def print_database(db_connection):
 		if i == 100:
 			break
 
+def count_unique_states_at_each_depth(db_connection):
+	state_to_cf_prev_depth = {}
+	state_to_cf = {}
+	depth = 0
+	while depth <= 8:
+		if depth == 0:
+			cf = ConnectFour()
+			state_to_cf = {cf.to_string(): cf}
+		else:
+			for cf in state_to_cf_prev_depth.values():
+				for cf_successor in [x.cf for x in SearchNode(cf).get_successors()]:
+					state = cf_successor.to_string()
+					state_to_cf[state] = cf_successor
+		n_solved_states = 0
+		for (state, cf) in state_to_cf.items():
+			if cf.get_heuristic_value() >= Heuristic.heuristic_value_win_threshold:
+				n_solved_states += 1
+				if get_value_of_state(db_connection, state) is None:
+					set_value_of_state(db_connection, state, cf.get_heuristic_value(), -1)
+		print("Depth {d} Unique states: {us} ({ss} solved) ({max} max)".format(
+			d=depth, us=len(state_to_cf), ss=n_solved_states, max=7**depth))
+		state_to_cf_prev_depth = state_to_cf
+		state_to_cf = {}
+		depth += 1
+
 if __name__ == "__main__":
 	db_connection = connect_to_db()
 	#db_connection.cursor().execute("delete from connectfour")
 	#db_connection.commit()
 	print("Number of rows in connectfour: ", get_number_of_rows(db_connection))
-	do_alphabeta(db_connection)
+	#do_alphabeta(db_connection)
+	count_unique_states_at_each_depth(db_connection)
 	print("Number of rows in connectfour: ", get_number_of_rows(db_connection))
 	#print_database(db_connection)
