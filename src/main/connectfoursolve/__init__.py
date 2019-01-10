@@ -13,19 +13,6 @@ def do_alphabeta(db_connection):
 		print(child_node.cf.to_human_readable_string())
 		print("Value:", value)
 
-def print_database(db_connection):
-	cursor = db_connection.cursor()
-	cursor.execute("select * from connectfour")
-	#cursor.execute("select distinct value from connectfour order by value")
-	i = 0
-	for (state, value, move) in cursor:  # @UnusedVariable
-		print("Row:", i, "State:", state, "Value:", value)
-		cf = ConnectFour.create_from_string(state)
-		print(cf.to_human_readable_string())
-		i += 1
-		if i == 1000:
-			break
-
 def count_unique_states_at_each_depth(db_connection):
 	state_to_cf_prev_depth = {}
 	state_to_cf = {}
@@ -38,8 +25,9 @@ def count_unique_states_at_each_depth(db_connection):
 	if depth is None:
 		depth = 0
 	else:
-		print("Fetched fringe from database. Depth={}".format(depth-1))
-	while depth <= 8:
+		print("Fetched fringe from database. Depth={d} States={s}".format(
+			d=depth-1, s=len(state_to_cf_prev_depth)))
+	while depth <= 10:
 		n_states = 0
 		if depth == 0:
 			cf = ConnectFour()
@@ -65,6 +53,19 @@ def count_unique_states_at_each_depth(db_connection):
 		state_to_cf_prev_depth = state_to_cf
 		state_to_cf = {}
 		depth += 1
+
+def print_database(db_connection):
+	cursor = db_connection.cursor()
+	cursor.execute("select * from connectfour")
+	#cursor.execute("select distinct value from connectfour order by value")
+	i = 0
+	for (state, value, move) in cursor:  # @UnusedVariable
+		print("Row:", i, "State:", state, "Value:", value)
+		cf = ConnectFour.create_from_string(state)
+		print(cf.to_human_readable_string())
+		i += 1
+		if i == 1000:
+			break
 
 if __name__ == "__main__":
 	db_connection = connect_to_db()

@@ -19,6 +19,10 @@ class SearchNode:
 			successor_cf = ConnectFour(self.cf)
 			if successor_cf.place_disc(i):
 				successors.append(SearchNode(successor_cf))
+		successors.sort(
+			key=lambda x: x.cf.get_heuristic_value(),
+			reverse=self.cf.get_current_player() == 0
+		)
 		return successors
 	
 	def get_state(self):
