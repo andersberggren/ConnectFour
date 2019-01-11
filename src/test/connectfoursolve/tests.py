@@ -200,8 +200,7 @@ class TestSuite(unittest.TestCase):
 		]
 		self.asserts_for_heuristic_value(string_list, 13, 1, 1000042-15)
 	
-	def test_get_heuristic_value_no_win(self):
-		# No win
+	def test_get_heuristic_value_immediate_threat_no_choice(self):
 		string_list = [
 			".......",
 			"..X....",
@@ -211,6 +210,18 @@ class TestSuite(unittest.TestCase):
 			"..OXXXO",
 		]
 		self.asserts_for_heuristic_value(string_list, 14, 0, -1)
+		# "X" to move. "O" has an immediate threat in column 2.
+		# "X" must place in column 2, multiple immediate threats (columns 2 and 4).
+		# "X" wins after 2 additional moves.
+		string_list = [
+			".......",
+			".......",
+			"...X...",
+			".X.XX..",
+			"XO.OO..",
+			"OXOXOO.",
+		]
+		self.asserts_for_heuristic_value(string_list, 14, 0, 1000042-17)
 
 	def asserts_for_heuristic_value(self, cf_as_string_list, number_of_discs, current_player,
 	                                heuristic_value):

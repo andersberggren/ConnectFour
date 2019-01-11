@@ -140,10 +140,10 @@ class Heuristic:
 		threats = self.get_threats()
 		immediate_threats = [self.get_immediate_threats(x) for x in threats]
 		current_player = self.cf.get_current_player()
-		opponent = 1 - current_player
+		opponent = (current_player+1) % 2
 		
 		# If current player has an immediate threat, current player will win in 1 move.
-		if len(self.get_immediate_threats(immediate_threats[current_player])) > 0:
+		if len(immediate_threats[current_player]) > 0:
 			#print("Current player has an immediate threat. Will win in 1 move.")
 			return self.get_heuristic_value_for_win(current_player, 1)
 		
@@ -162,13 +162,56 @@ class Heuristic:
 			cf_successor.place_disc(column_of_threat)
 			return cf_successor.get_heuristic_value()
 		
-		return len(threats[0]) - len(threats[1])
+		if all(len(x) == 0 for x in threats):
+			# Neither player has any threats. Unable to determine advantage.
+			return 0
+		
+		# Determine which player has advantage, based on zugzwang
+		# Which positions are playable for both players?
+		# Take turns and place disc in those positions as long as possible.
+		# Now, it's either:
+		# - A tie (board is full)
+		# - Player has to sacrifice own threat
+		# - Player plays a disc where opponent has an active threat (and loses)
+		open_positions = self.get_open_positions()
+		playable_positions = []
+		for player in [0, 1]:
+			playable_positions.append({
+				(x,y) for x in range(ConnectFour.width) for y in range(ConnectFour.height)
+				if self.cf.discs[x][y] is None and not any(threat[0] == x and threat[1] <= y+1
+				                                           for threat in threats[(player+1)%2])
+			})
+		playable_positions_common = playable_positions[0] & playable_positions[1]
+		open_positions -= playable_positions_common
+		playable_positions[0] -= playable_positions_common
+		playable_positions[1] -= playable_positions_common
+		current_player = (current_player+len(playable_positions_common)) % 2
+		
+		# This part below doesn't really work.
+		# Have to consider when a player has to sacrifice an own threat, just to keep playing.
+		# That opens up more positions to play.
+		#while True:
+			#print("Current player:", current_player)
+			#print(playable_positions)
+			#if len(playable_positions[current_player]) == 0:
+			#	return -1 if current_player == 0 else 1
+			#playable_positions[current_player].pop()
+			#current_player = 1-current_player
+		if len(playable_positions[current_player]) == 0:
+			return -1 if current_player == 0 else 1
+		return 0
 	
 	def get_heuristic_value_for_win(self, player, number_of_moves_left):
 		value = 1000000 + ConnectFour.width*ConnectFour.height \
 				- (self.cf.get_number_of_discs()+number_of_moves_left)
 		return value if player == 0 else -value
 	
+	def get_open_positions(self):
+		return {
+			(x,y) for x in range(ConnectFour.width) for y in range(ConnectFour.height)
+			if self.cf.discs[x][y] is None
+		}
+		
 	def get_immediate_threats(self, threats):
 		immediate_threats = set()
 		for threat in sorted(threats, key=lambda pos: (pos[1],pos[0])):
@@ -182,10 +225,7 @@ class Heuristic:
 		Returns a list of lists with player threats.
 		"""
 		player_threat_list = []
-		open_positions = [
-			(x,y) for x in range(ConnectFour.width) for y in range(ConnectFour.height)
-			if self.cf.discs[x][y] is None
-		]
+		open_positions = self.get_open_positions()
 		for player in [0, 1]:
 			player_threats = []
 			for position in open_positions:
