@@ -11,8 +11,6 @@ beta_default  =  1000000000
 # - get_state() Optional, to prevent creation/evaluation of equivalent nodes
 class AlphaBeta:
 	def __init__(self, db_connection=None):
-		#self.node_state_to_heuristic_value = {}
-		#self.n_terminal_nodes = 0
 		self.db_connection = db_connection
 		self.number_of_db_writes = 0
 	
@@ -23,8 +21,6 @@ class AlphaBeta:
 		if node.is_terminal_node():
 			node_state = node.get_state()
 			value = node.get_heuristic_value()
-			#self.node_state_to_heuristic_value[node_state] = value
-			#self.n_terminal_nodes += 1
 			self.set_heuristic_value(node_state, value)
 			return value
 		if depth == 0:
@@ -35,8 +31,6 @@ class AlphaBeta:
 			child_value = self.alphabeta(child_node, depth-1, not maximizing_player, alpha, beta)
 			if abs(child_value) >= Heuristic.heuristic_value_win_threshold:
 				child_node_state = child_node.get_state()
-				#self.node_state_to_heuristic_value[child_node_state] = child_value
-				#self.n_terminal_nodes += 1
 				self.set_heuristic_value(child_node_state, child_value)
 			if maximizing_player:
 				value = max(value, child_value)

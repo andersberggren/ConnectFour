@@ -153,7 +153,7 @@ class TestSuite(unittest.TestCase):
 		]
 		self.asserts_for_heuristic_value(string_list, 11, 1, 1000042-11)
 	
-	def test_get_heuristic_value_almost_win(self):
+	def test_get_heuristic_value_imminent_win(self):
 		string_list = [
 			".......",
 			".......",
@@ -194,12 +194,50 @@ class TestSuite(unittest.TestCase):
 			".......",
 			".......",
 			"..X..X.",
-			"..O?XO.",
-			"..O?XO.",
+			"..O.XO.",
+			"..O.XO.",
 			".XXOOX.",
 		]
 		self.asserts_for_heuristic_value(string_list, 13, 1, 1000042-15)
 	
+	def test_get_heuristic_value_centralness(self):
+		string_list = [
+			".......",
+			".......",
+			".......",
+			".......",
+			".......",
+			"...X...",
+		]
+		self.asserts_for_heuristic_value(string_list, 1, 1, 0)
+		string_list = [
+			".......",
+			".......",
+			".......",
+			".......",
+			".......",
+			"....X.O",
+		]
+		self.asserts_for_heuristic_value(string_list, 2, 0, 2)
+		string_list = [
+			"...O...",
+			"...X...",
+			"...O...",
+			"...X...",
+			"...O...",
+			"...X...",
+		]
+		self.asserts_for_heuristic_value(string_list, 6, 0, 0)
+		string_list = [
+			"...O...",
+			"...X...",
+			"...O...",
+			"...X...",
+			"..XO...",
+			".OXXXO.",
+		]
+		self.asserts_for_heuristic_value(string_list, 11, 1, 1)
+		
 	def test_get_heuristic_value_immediate_threat_no_choice(self):
 		string_list = [
 			".......",
@@ -209,7 +247,7 @@ class TestSuite(unittest.TestCase):
 			"..OOXO.",
 			"..OXXXO",
 		]
-		self.asserts_for_heuristic_value(string_list, 14, 0, -1)
+		self.asserts_for_heuristic_value(string_list, 14, 0, -100)
 		# "X" to move. "O" has an immediate threat in column 2.
 		# "X" must place in column 2, multiple immediate threats (columns 2 and 4).
 		# "X" wins after 2 additional moves.

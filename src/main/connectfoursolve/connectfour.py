@@ -163,43 +163,50 @@ class Heuristic:
 			return cf_successor.get_heuristic_value()
 		
 		if all(len(x) == 0 for x in threats):
-			# Neither player has any threats. Unable to determine advantage.
-			return 0
+			# Neither player has any threats.
+			# Player with the most central discs has advantage.
+			return sum([
+				abs(ConnectFour.width//2 - x) * (-1 if self.cf.discs[x][y] == 0 else 1)
+				for x in range(ConnectFour.width) for y in range(ConnectFour.height)
+				if self.cf.discs[x][y] is not None
+			])
 		
-		# Determine which player has advantage, based on zugzwang
+		# Determine which player has advantage, based on zugzwang.
 		# Which positions are playable for both players?
 		# Take turns and place disc in those positions as long as possible.
-		# Now, it's either:
-		# - A tie (board is full)
+		# After that, it's either:
+		# - Player has to play a disc where opponent has an active threat (and loses)
 		# - Player has to sacrifice own threat
-		# - Player plays a disc where opponent has an active threat (and loses)
 		open_positions = self.get_open_positions()
-		playable_positions = []
-		for player in [0, 1]:
-			playable_positions.append({
-				(x,y) for x in range(ConnectFour.width) for y in range(ConnectFour.height)
-				if self.cf.discs[x][y] is None and not any(threat[0] == x and threat[1] <= y+1
-				                                           for threat in threats[(player+1)%2])
-			})
-		playable_positions_common = playable_positions[0] & playable_positions[1]
-		open_positions -= playable_positions_common
-		playable_positions[0] -= playable_positions_common
-		playable_positions[1] -= playable_positions_common
-		current_player = (current_player+len(playable_positions_common)) % 2
-		
-		# This part below doesn't really work.
-		# Have to consider when a player has to sacrifice an own threat, just to keep playing.
-		# That opens up more positions to play.
-		#while True:
-			#print("Current player:", current_player)
-			#print(playable_positions)
-			#if len(playable_positions[current_player]) == 0:
-			#	return -1 if current_player == 0 else 1
-			#playable_positions[current_player].pop()
-			#current_player = 1-current_player
-		if len(playable_positions[current_player]) == 0:
-			return -1 if current_player == 0 else 1
-		return 0
+		while True:
+			if len(open_positions) == 0:
+				return 100 * (len(threats[0]) - len(threats[1]))
+			playable_positions = []
+			for player in [0, 1]:
+				playable_positions.append({
+					(x,y) for (x,y) in open_positions
+					if (y == 0 or (x,y-1) not in open_positions) \
+							and (x,y+1) not in threats[(player+1)%2]
+				})
+			if len(playable_positions[current_player]) == 0:
+				return 1000 * (-1 if current_player == 0 else 1)
+			playable_positions_common = playable_positions[0] & playable_positions[1]
+			if len(playable_positions_common) > 1:
+				open_positions.remove(playable_positions_common.pop())
+				current_player = (current_player+1) % 2
+				continue
+			# Current player has to sacrifice own threat.
+			# Look for position that changes zugzwang.
+			zugswang_position = next((
+				(x,y) for (x,y) in playable_positions[current_player]
+				if (ConnectFour.height-y) % 2 == 0
+			), None)
+			if zugswang_position is not None:
+				open_positions.remove(zugswang_position)
+				current_player = (current_player+1) % 2
+				continue
+			open_positions.remove(playable_positions[current_player].pop())
+			current_player = (current_player+1) % 2
 	
 	def get_heuristic_value_for_win(self, player, number_of_moves_left):
 		value = 1000000 + ConnectFour.width*ConnectFour.height \

@@ -57,7 +57,6 @@ def count_unique_states_at_each_depth(db_connection):
 def print_database(db_connection):
 	cursor = db_connection.cursor()
 	cursor.execute("select * from connectfour")
-	#cursor.execute("select distinct value from connectfour order by value")
 	i = 0
 	for (state, value, move) in cursor:  # @UnusedVariable
 		print("Row:", i, "State:", state, "Value:", value)
