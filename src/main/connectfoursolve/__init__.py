@@ -42,7 +42,7 @@ def count_unique_states_at_each_depth(db_connection):
 		for (state, cf) in state_to_cf.items():
 			if abs(cf.get_heuristic_value()) >= Heuristic.heuristic_value_win_threshold:
 				n_solved_states += 1
-				set_value_of_state(db_connection, state, cf.get_heuristic_value(), -1)
+				set_value_of_state(db_connection, state, cf.get_heuristic_value())
 		print("Depth {d} States: {s:,} Unique states: {us:,} ({ss:,} solved) ({max:,} max)".format(
 			d=depth, s=n_states, us=len(state_to_cf), ss=n_solved_states, max=7**depth))
 		unsolved_states = [
@@ -77,7 +77,7 @@ if __name__ == "__main__":
 	#print(cf.get_heuristic_value())
 	
 	print("Number of rows in connectfour: ", get_number_of_rows(db_connection))
-	#do_alphabeta(db_connection)
-	count_unique_states_at_each_depth(db_connection)
+	do_alphabeta(db_connection)
+	#count_unique_states_at_each_depth(db_connection)
 	print("Number of rows in connectfour: ", get_number_of_rows(db_connection))
 	#print_database(db_connection)

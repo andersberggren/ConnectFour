@@ -56,7 +56,7 @@ class AlphaBeta:
 	def set_heuristic_value(self, state, value):
 		if self.db_connection is None:
 			return
-		set_value_of_state(self.db_connection, state, value, -1)
+		set_value_of_state(self.db_connection, state, value)
 		self.number_of_db_writes += 1
 		if self.number_of_db_writes % 1000 == 0:
 			print("{} states written to database".format(self.number_of_db_writes))

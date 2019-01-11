@@ -20,10 +20,10 @@ def get_value_of_state(db, state):
 	row = cursor.fetchone()
 	return row[0] if row is not None else None
 
-def set_value_of_state(db, state, value, move):
+def set_value_of_state(db, state, value):
 	cursor = db.cursor()
-	sql = "replace into connectfour (state, value, move) values (%s, %s, %s)"
-	cursor.execute(sql, (state, value, move))
+	sql = "replace into connectfour (state, value) values (%s, %s)"
+	cursor.execute(sql, (state, value))
 	db.commit()
 
 def get_number_of_rows(db):
