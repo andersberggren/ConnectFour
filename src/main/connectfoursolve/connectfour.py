@@ -136,6 +136,8 @@ class Heuristic:
 		winner = self.cf.get_winner()
 		if winner is not None:
 			return self.get_heuristic_value_for_win(winner, 0)
+		if self.cf.get_number_of_discs() == ConnectFour.width * ConnectFour.height:
+			return 0
 		
 		threats = self.get_threats()
 		immediate_threats = [self.get_immediate_threats(x) for x in threats]

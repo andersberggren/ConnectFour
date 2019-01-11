@@ -13,25 +13,30 @@ class AlphaBeta:
 	def __init__(self, db_connection=None):
 		self.db_connection = db_connection
 		self.number_of_db_writes = 0
+		self.evaluated_states = set()
+		self.n_skipped_states = 0
 	
 	def alphabeta(self, node, depth, maximizing_player, alpha=alpha_default, beta=beta_default):
 		value_from_db = self.get_heuristic_value_from_database(node)
 		if value_from_db is not None:
 			return value_from_db
-		if node.is_terminal_node():
-			node_state = node.get_state()
-			value = node.get_heuristic_value()
-			self.set_heuristic_value(node_state, value)
-			return value
+		heuristic_value = node.get_heuristic_value()
+		if abs(heuristic_value) >= Heuristic.heuristic_value_win_threshold \
+				or node.is_terminal_node():
+			self.set_heuristic_value(node, heuristic_value)
+			return heuristic_value
 		if depth == 0:
-			return node.get_heuristic_value()
+			return heuristic_value
 		
 		value = alpha_default if maximizing_player else beta_default
 		for child_node in node.get_successors():
+			child_state = child_node.get_state()
+			if child_state in self.evaluated_states:
+				self.n_skipped_states += 1
+				continue
+			else:
+				self.evaluated_states.add(child_state)
 			child_value = self.alphabeta(child_node, depth-1, not maximizing_player, alpha, beta)
-			if abs(child_value) >= Heuristic.heuristic_value_win_threshold:
-				child_node_state = child_node.get_state()
-				self.set_heuristic_value(child_node_state, child_value)
 			if maximizing_player:
 				value = max(value, child_value)
 				alpha = max(alpha, value)
@@ -47,10 +52,11 @@ class AlphaBeta:
 			return None
 		return get_value_of_state(self.db_connection, node.cf.to_string())
 	
-	def set_heuristic_value(self, state, value):
+	def set_heuristic_value(self, node, value):
 		if self.db_connection is None:
 			return
-		set_value_of_state(self.db_connection, state, value)
+		set_value_of_state(self.db_connection, node.get_state(), value)
 		self.number_of_db_writes += 1
 		if self.number_of_db_writes % 1000 == 0:
 			print("{} states written to database".format(self.number_of_db_writes))
+			print("{} skipped nodes".format(self.n_skipped_states))
