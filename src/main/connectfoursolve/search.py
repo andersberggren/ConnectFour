@@ -1,4 +1,3 @@
-from connectfoursolve.db import get_value_of_state, set_value_of_state
 from connectfoursolve.connectfour import Heuristic
 
 alpha_default = -1000000000
@@ -11,7 +10,7 @@ beta_default  =  1000000000
 # - get_state() Optional, to prevent creation/evaluation of equivalent nodes
 class AlphaBeta:
 	def __init__(self, db_connection=None):
-		self.db_connection = db_connection
+		self.db = db_connection
 		self.number_of_db_writes = 0
 		self.evaluated_states = set()
 		self.n_skipped_states = 0
@@ -48,14 +47,14 @@ class AlphaBeta:
 		return value
 	
 	def get_heuristic_value_from_database(self, node):
-		if self.db_connection is None:
+		if self.db is None:
 			return None
-		return get_value_of_state(self.db_connection, node.cf.to_string())
+		return self.db.get_value_of_state(node.cf.to_string())
 	
 	def set_heuristic_value(self, node, value):
-		if self.db_connection is None:
+		if self.db is None:
 			return
-		set_value_of_state(self.db_connection, node.get_state(), value)
+		self.db.set_value_of_state(node.get_state(), value)
 		self.number_of_db_writes += 1
 		if self.number_of_db_writes % 1000 == 0:
 			print("{} states written to database".format(self.number_of_db_writes))

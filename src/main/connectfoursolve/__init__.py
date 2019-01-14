@@ -1,24 +1,23 @@
 from connectfoursolve.connectfour import ConnectFour, Heuristic
-from connectfoursolve.db import connect_to_db, get_value_of_state, set_value_of_state, \
-                                get_number_of_rows, add_fringe, get_fringe
+from connectfoursolve.database import DatabaseConnection
 from connectfoursolve.search import AlphaBeta
 from connectfoursolve.searchnode import SearchNode
 
-def do_alphabeta(db_connection):
+def do_alphabeta(db):
 	initial_node = SearchNode(ConnectFour())
-	alphabeta = AlphaBeta(db_connection=db_connection)
+	alphabeta = AlphaBeta(db_connection=db)
+	depth = 8
 	for child_node in initial_node.get_successors():
-		value = alphabeta.alphabeta(child_node, 42, False)
+		value = alphabeta.alphabeta(child_node, depth-1, False)
 		print("Child node:")
 		print(child_node.cf.to_human_readable_string())
 		print("Value:", value)
 
-def count_unique_states_at_each_depth(db_connection):
+def count_unique_states_at_each_depth(db):
 	state_to_cf_prev_depth = {}
 	state_to_cf = {}
 	depth = None
-	cursor = get_fringe(db_connection)
-	for row in cursor:
+	for row in db.get_fringe():
 		state = row[0]
 		depth = row[1]+1
 		state_to_cf_prev_depth[state] = ConnectFour.create_from_string(state)
@@ -42,14 +41,14 @@ def count_unique_states_at_each_depth(db_connection):
 		for (state, cf) in state_to_cf.items():
 			if abs(cf.get_heuristic_value()) >= Heuristic.heuristic_value_win_threshold:
 				n_solved_states += 1
-				set_value_of_state(db_connection, state, cf.get_heuristic_value())
+				db.set_value_of_state(state, cf.get_heuristic_value())
 		print("Depth {d} States: {s:,} Unique states: {us:,} ({ss:,} solved) ({max:,} max)".format(
 			d=depth, s=n_states, us=len(state_to_cf), ss=n_solved_states, max=7**depth))
 		unsolved_states = [
 			state for (state, cf) in state_to_cf.items()
 			if abs(cf.get_heuristic_value()) < Heuristic.heuristic_value_win_threshold
 		]
-		add_fringe(db_connection, unsolved_states, depth)
+		db.add_fringe(unsolved_states, depth)
 		state_to_cf_prev_depth = state_to_cf
 		state_to_cf = {}
 		depth += 1
@@ -67,16 +66,11 @@ def print_database(db_connection):
 			break
 
 if __name__ == "__main__":
-	db_connection = connect_to_db()
-	#db_connection.cursor().execute("delete from connectfour")
-	#db_connection.commit()
+	db = DatabaseConnection()
+	#db.execute_sql("delete from connectfour")
 	
-	#cf = ConnectFour.create_from_string("010b0703010404")
-	#print(cf.to_human_readable_string())
-	#print(cf.get_heuristic_value())
-	
-	print("Number of rows in connectfour: ", get_number_of_rows(db_connection))
-	do_alphabeta(db_connection)
-	#count_unique_states_at_each_depth(db_connection)
-	print("Number of rows in connectfour: ", get_number_of_rows(db_connection))
-	#print_database(db_connection)
+	print("Number of solved states: ", db.get_number_of_solved_states())
+	do_alphabeta(db)
+	#count_unique_states_at_each_depth(db)
+	print("Number of solved states: ", db.get_number_of_solved_states())
+	#print_database(db)
