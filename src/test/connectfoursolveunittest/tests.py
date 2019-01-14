@@ -1,6 +1,7 @@
 import unittest
 
 from connectfoursolve.connectfour import ConnectFour
+from connectfoursolve.heuristic import Heuristic
 
 class TestSuite(unittest.TestCase):
 	def test_init(self):
@@ -266,9 +267,7 @@ class TestSuite(unittest.TestCase):
 		cf = string_list_to_connect_four(cf_as_string_list)
 		self.assertEqual(cf.get_number_of_discs(), number_of_discs)
 		self.assertEqual(cf.get_current_player(), current_player)
-		#print("Get heuristic value for:")
-		#print(cf.to_human_readable_string())
-		self.assertEqual(cf.get_heuristic_value(), heuristic_value)
+		self.assertEqual(Heuristic(cf).get_heuristic_value(), heuristic_value)
 
 def string_list_to_connect_four(string_list):
 	symbol_to_player = {"X": 0, "O": 1}

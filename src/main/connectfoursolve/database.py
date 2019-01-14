@@ -20,6 +20,11 @@ class DatabaseConnection:
 	def execute_sql(self, sql):
 		cursor = self.db.cursor()
 		cursor.execute(sql)
+		return cursor
+		
+	def execute_sql_and_commit(self, sql):
+		cursor = self.db.cursor()
+		cursor.execute(sql)
 		self.db.commit()
 	
 	def get_number_of_solved_states(self):

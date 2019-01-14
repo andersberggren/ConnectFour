@@ -1,4 +1,4 @@
-from connectfoursolve.connectfour import Heuristic
+from connectfoursolve.heuristic import Heuristic
 
 alpha_default = -1000000000
 beta_default  =  1000000000
