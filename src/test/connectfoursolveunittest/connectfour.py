@@ -52,3 +52,20 @@ class Test(unittest.TestCase):
 			self.assertIsNone(cf.get_winner())
 		self.assertTrue(cf.place_disc(2))
 		self.assertEqual(cf.get_winner(), 0)
+	
+	def test_create_from_string(self):
+		# .......
+		# .......
+		# ..X....
+		# ..X....
+		# ..XOOO.
+		# .OXXXO.
+		cf_as_string = "01031006060701"
+		cf = ConnectFour.create_from_string(cf_as_string)
+		self.assertEqual(cf.get_number_of_discs(), 11)
+		self.assertEqual(cf.discs[1][0], 1)
+		self.assertEqual(cf.discs[2][3], 0)
+		self.assertIsNone(cf.discs[3][2])
+		self.assertEqual(cf.get_current_player(), 1)
+		self.assertEqual(cf.get_winner(), 0)
+		self.assertEqual(cf.to_string(), cf_as_string)
