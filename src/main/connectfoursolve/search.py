@@ -18,16 +18,17 @@ class AlphaBeta:
 	def alphabeta(self, node, depth, maximizing_player, alpha=alpha_default, beta=beta_default):
 		value_from_db = self.get_heuristic_value_from_database(node)
 		if value_from_db is not None:
-			return value_from_db
+			return (node, value_from_db)
 		heuristic_value = node.get_heuristic_value()
 		if abs(heuristic_value) >= Heuristic.heuristic_value_win_threshold \
 				or node.is_terminal_node():
 			self.set_heuristic_value(node, heuristic_value)
-			return heuristic_value
+			return (node, heuristic_value)
 		if depth == 0:
-			return heuristic_value
+			return (node, heuristic_value)
 		
-		value = alpha_default if maximizing_player else beta_default
+		best_child_node = None
+		best_child_value = alpha_default if maximizing_player else beta_default
 		for child_node in node.get_successors():
 			child_state = child_node.get_state()
 			if child_state in self.evaluated_states:
@@ -35,16 +36,20 @@ class AlphaBeta:
 				continue
 			else:
 				self.evaluated_states.add(child_state)
-			child_value = self.alphabeta(child_node, depth-1, not maximizing_player, alpha, beta)
+			(_, child_value) = self.alphabeta(child_node, depth-1, not maximizing_player, alpha, beta)
 			if maximizing_player:
-				value = max(value, child_value)
-				alpha = max(alpha, value)
+				if child_value > best_child_value:
+					best_child_value = child_value
+					best_child_node = child_node
+				alpha = max(alpha, best_child_value)
 			else:
-				value = min(value, child_value)
-				beta = min(beta, value)
+				if child_value < best_child_value:
+					best_child_value = child_value
+					best_child_node = child_node
+				beta = min(beta, best_child_value)
 			if alpha >= beta:
 				break
-		return value
+		return (best_child_node, best_child_value)
 	
 	def get_heuristic_value_from_database(self, node):
 		if self.db is None:

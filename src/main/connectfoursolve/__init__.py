@@ -10,11 +10,10 @@ def do_alphabeta(db):
 	initial_node = SearchNode(ConnectFour(), Heuristic100)
 	alphabeta = AlphaBeta(db_connection=db)
 	depth = 8
-	for child_node in initial_node.get_successors():
-		value = alphabeta.alphabeta(child_node, depth-1, False)
-		print("Child node:")
-		print(child_node.cf.to_human_readable_string())
-		print("Value:", value)
+	(node, value) = alphabeta.alphabeta(initial_node, depth, True)
+	print("Best move:")
+	print(node.cf.to_human_readable_string())
+	print("Value:", value)
 
 def print_database(db):
 	cursor = db.execute_sql("select * from connectfour")
@@ -32,7 +31,7 @@ if __name__ == "__main__":
 	#db.execute_sql_and_commit("delete from connectfour")
 	
 	print("Number of solved states: ", db.get_number_of_solved_states())
-	#do_alphabeta(db)
-	count_unique_states_at_each_depth(db)
+	do_alphabeta(db)
+	#count_unique_states_at_each_depth(db)
 	print("Number of solved states: ", db.get_number_of_solved_states())
 	#print_database(db)
