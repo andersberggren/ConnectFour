@@ -19,12 +19,10 @@ class ConnectFour:
 		return False
 	
 	def get_number_of_discs(self):
-		count = 0
-		for x in range(7):
-			for y in range(6):
-				if self.discs[x][y] is not None:
-					count += 1
-		return count
+		return len([
+			1 for x in range(ConnectFour.width) for y in range(ConnectFour.height)
+			if self.discs[x][y] is not None
+		])
 	
 	def get_current_player(self):
 		return self.get_number_of_discs() % 2
