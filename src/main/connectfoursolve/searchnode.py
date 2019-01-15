@@ -1,9 +1,9 @@
 from connectfoursolve.connectfour import ConnectFour
-from connectfoursolve.heuristic import Heuristic
 
 class SearchNode:
-	def __init__(self, cf):
+	def __init__(self, cf, heuristic_class):
 		self.cf = cf
+		self.heuristic_class = heuristic_class
 		self.heuristic_value = None
 	
 	def is_terminal_node(self):
@@ -12,7 +12,7 @@ class SearchNode:
 	
 	def get_heuristic_value(self):
 		if self.heuristic_value is None:
-			self.heuristic_value = Heuristic(self.cf).get_heuristic_value()
+			self.heuristic_value = self.heuristic_class(self.cf).get_heuristic_value()
 		return self.heuristic_value
 	
 	def get_successors(self):
@@ -22,7 +22,7 @@ class SearchNode:
 		for i in range(ConnectFour.width):
 			successor_cf = ConnectFour(self.cf)
 			if successor_cf.place_disc(i):
-				successors.append(SearchNode(successor_cf))
+				successors.append(SearchNode(successor_cf, self.heuristic_class))
 		successors.sort(
 			key=lambda x: x.get_heuristic_value(),
 			reverse=self.cf.get_current_player() == 0

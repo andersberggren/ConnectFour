@@ -3,9 +3,10 @@ from connectfoursolve.database import DatabaseConnection
 from connectfoursolve.search import AlphaBeta
 from connectfoursolve.searchnode import SearchNode
 from connectfoursolve.heuristic import Heuristic
+from connectfoursolve.heuristic100 import Heuristic100
 
 def do_alphabeta(db):
-	initial_node = SearchNode(ConnectFour())
+	initial_node = SearchNode(ConnectFour(), Heuristic100)
 	alphabeta = AlphaBeta(db_connection=db)
 	depth = 8
 	for child_node in initial_node.get_successors():
@@ -15,6 +16,7 @@ def do_alphabeta(db):
 		print("Value:", value)
 
 def count_unique_states_at_each_depth(db):
+	heuristic_class = Heuristic100
 	state_to_node_prev_depth = {}
 	state_to_node = {}
 	depth = None
@@ -22,7 +24,7 @@ def count_unique_states_at_each_depth(db):
 		state = row[0]
 		depth = row[1]+1
 		cf = ConnectFour.create_from_string(state)
-		node = SearchNode(cf)
+		node = SearchNode(cf, heuristic_class)
 		state_to_node_prev_depth[state] = node
 	if depth is None:
 		depth = 0
@@ -32,7 +34,7 @@ def count_unique_states_at_each_depth(db):
 	while depth <= 6:
 		n_states = 0
 		if depth == 0:
-			node = SearchNode(ConnectFour())
+			node = SearchNode(ConnectFour(), heuristic_class)
 			state_to_node = {node.get_state(): node}
 		else:
 			for node in state_to_node_prev_depth.values():
@@ -72,7 +74,7 @@ if __name__ == "__main__":
 	#db.execute_sql_and_commit("delete from connectfour")
 	
 	print("Number of solved states: ", db.get_number_of_solved_states())
-	#do_alphabeta(db)
-	count_unique_states_at_each_depth(db)
+	do_alphabeta(db)
+	#count_unique_states_at_each_depth(db)
 	print("Number of solved states: ", db.get_number_of_solved_states())
 	#print_database(db)
