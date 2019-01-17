@@ -12,10 +12,11 @@ class AlphaBeta:
 	def __init__(self, db_connection=None):
 		self.db = db_connection
 		self.number_of_db_writes = 0
-		self.evaluated_states = set()
-		self.n_skipped_states = 0
+		self.n_created_nodes = 0
+		self.n_evaluated_nodes = 0
 	
 	def alphabeta(self, node, depth, maximizing_player, alpha=alpha_default, beta=beta_default):
+		self.n_evaluated_nodes += 1
 		value_from_db = self.get_heuristic_value_from_database(node)
 		if value_from_db is not None:
 			return (node, value_from_db)
@@ -29,13 +30,10 @@ class AlphaBeta:
 		
 		best_child_node = None
 		best_child_value = alpha_default if maximizing_player else beta_default
-		for child_node in node.get_successors():
+		successors = node.get_successors()
+		self.n_created_nodes += len(successors)
+		for child_node in successors:
 			child_state = child_node.get_state()
-			if child_state in self.evaluated_states:
-				self.n_skipped_states += 1
-				continue
-			else:
-				self.evaluated_states.add(child_state)
 			(_, child_value) = self.alphabeta(child_node, depth-1, not maximizing_player, alpha, beta)
 			if maximizing_player:
 				if child_value > best_child_value:

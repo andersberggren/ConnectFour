@@ -75,6 +75,10 @@ class ConnectFour:
 			y += direction[1]
 		return None
 	
+	def is_game_over(self):
+		return self.get_number_of_discs() == ConnectFour.width*ConnectFour.height \
+				or self.get_winner() is not None
+	
 	def to_string(self):
 		column_strings = []
 		for x in range(ConnectFour.width):

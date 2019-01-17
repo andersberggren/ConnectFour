@@ -7,8 +7,7 @@ class SearchNode:
 		self.heuristic_value = None
 	
 	def is_terminal_node(self):
-		return self.cf.get_winner() is not None \
-				or self.cf.get_number_of_discs() == ConnectFour.width*ConnectFour.height
+		return self.cf.is_game_over()
 	
 	def get_heuristic_value(self):
 		if self.heuristic_value is None:
