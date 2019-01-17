@@ -1,8 +1,5 @@
 from connectfoursolve.heuristic import Heuristic
 
-alpha_default = -1000000000
-beta_default  =  1000000000
-
 # SearchNode needs the following methods:
 # - is_terminal_node()
 # - get_heuristic_value()
@@ -15,7 +12,7 @@ class AlphaBeta:
 		self.n_created_nodes = 0
 		self.n_evaluated_nodes = 0
 	
-	def alphabeta(self, node, depth, maximizing_player, alpha=alpha_default, beta=beta_default):
+	def alphabeta(self, node, depth, maximizing_player, alpha=None, beta=None):
 		self.n_evaluated_nodes += 1
 		value_from_db = self.get_heuristic_value_from_database(node)
 		if value_from_db is not None:
@@ -29,23 +26,24 @@ class AlphaBeta:
 			return (node, heuristic_value)
 		
 		best_child_node = None
-		best_child_value = alpha_default if maximizing_player else beta_default
+		best_child_value = None
 		successors = node.get_successors()
 		self.n_created_nodes += len(successors)
 		for child_node in successors:
-			child_state = child_node.get_state()
 			(_, child_value) = self.alphabeta(child_node, depth-1, not maximizing_player, alpha, beta)
 			if maximizing_player:
-				if child_value > best_child_value:
+				if child_value is not None and (best_child_value is None or child_value > best_child_value):
 					best_child_value = child_value
 					best_child_node = child_node
-				alpha = max(alpha, best_child_value)
+					if alpha is None or best_child_value > alpha:
+						alpha = best_child_value
 			else:
-				if child_value < best_child_value:
+				if child_value is not None and (best_child_value is None or child_value < best_child_value):
 					best_child_value = child_value
 					best_child_node = child_node
-				beta = min(beta, best_child_value)
-			if alpha >= beta:
+					if beta is None or best_child_value < beta:
+						beta = best_child_value
+			if alpha is not None and beta is not None and alpha >= beta:
 				break
 		return (best_child_node, best_child_value)
 	
