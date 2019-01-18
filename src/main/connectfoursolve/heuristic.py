@@ -13,9 +13,11 @@ class Heuristic:
 	def get_heuristic_value(self):
 		return 0
 	
-	def get_heuristic_value_for_win(self, player, number_of_moves_left):
-		value = Heuristic.heuristic_value_win_threshold + ConnectFour.width*ConnectFour.height \
-				- (self.cf.get_number_of_discs()+number_of_moves_left)
+	def get_heuristic_value_for_win(self, player, number_of_moves_left=None):
+		value = Heuristic.heuristic_value_win_threshold
+		if number_of_moves_left is not None:
+			value += ConnectFour.width*ConnectFour.height \
+					- (self.cf.get_number_of_discs()+number_of_moves_left)
 		return value if player == 0 else -value
 	
 	def get_open_positions(self):
