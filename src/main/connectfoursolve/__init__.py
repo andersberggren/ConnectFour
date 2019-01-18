@@ -8,12 +8,14 @@ from connectfoursolve.solve import count_unique_states_at_each_depth
 
 def do_alphabeta(db):
 	initial_node = SearchNode(ConnectFour(), Heuristic100)
-	alphabeta = AlphaBeta(db_connection=db)
-	depth = 8
-	(node, value) = alphabeta.alphabeta(initial_node, depth, True)
-	print("Best move:")
-	print(node.cf.to_human_readable_string())
-	print("Value:", value)
+	max_depth = 6
+	for depth in range(1, max_depth+1):
+		#alphabeta = AlphaBeta(db_connection=db)
+		alphabeta = AlphaBeta()
+		(node, value) = alphabeta.alphabeta(initial_node, depth, True)
+		print("Depth: {d}  Nodes created: {c}  Nodes evaluated: {e}  Best move value: {v}".format(
+				d=depth, c=alphabeta.n_created_nodes, e=alphabeta.n_evaluated_nodes, v=value))
+		print(node.cf.to_human_readable_string())
 
 def print_database(db):
 	cursor = db.execute_sql("select * from connectfour")
