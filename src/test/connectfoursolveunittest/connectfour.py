@@ -14,9 +14,13 @@ class Test(unittest.TestCase):
 	def test_place_disc(self):
 		cf = ConnectFour()
 		for i in range(ConnectFour.height):  # @UnusedVariable
-			self.assertTrue(cf.place_disc(4))
-		self.assertTrue(cf.place_disc(3))
-		self.assertFalse(cf.place_disc(4))
+			cf.place_disc(4)
+		cf.place_disc(3)
+		try:
+			cf.place_disc(4)
+			self.fail("Expected ValueError")
+		except ValueError:
+			pass
 		try:
 			cf.place_disc(-1)
 			self.fail("Expected ValueError")
@@ -45,12 +49,12 @@ class Test(unittest.TestCase):
 		cf = ConnectFour()
 		for i in range(len(positions)):
 			(x,y) = positions[i]
-			self.assertTrue(cf.place_disc(x))
+			cf.place_disc(x)
 			self.assertEqual(cf.get_number_of_discs(), i+1)
 			self.assertEqual(cf.discs[x][y], i % 2)
 			self.assertEqual(cf.get_current_player(), (i+1) % 2)
 			self.assertIsNone(cf.get_winner())
-		self.assertTrue(cf.place_disc(2))
+		cf.place_disc(2)
 		self.assertEqual(cf.get_winner(), 0)
 	
 	def test_create_from_string(self):

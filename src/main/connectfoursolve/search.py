@@ -15,35 +15,32 @@ class AlphaBeta:
 		self.n_evaluated_nodes += 1
 		value_from_db = self.get_heuristic_value_from_database(node)
 		if value_from_db is not None:
-			return (node, value_from_db)
+			return value_from_db
 		heuristic_value = node.get_heuristic_value()
 		if node.is_solved():
 			self.set_heuristic_value(node, heuristic_value)
-			return (node, heuristic_value)
+			return heuristic_value
 		if depth == 0:
-			return (node, heuristic_value)
+			return heuristic_value
 		
-		best_child_node = None
 		best_child_value = None
 		successors = node.get_successors()
 		self.n_created_nodes += len(successors)
 		for child_node in successors:
-			(_, child_value) = self.alphabeta(child_node, depth-1, not maximizing_player, alpha, beta)
+			child_value = self.alphabeta(child_node, depth-1, not maximizing_player, alpha, beta)
 			if maximizing_player:
 				if child_value is not None and (best_child_value is None or child_value > best_child_value):
 					best_child_value = child_value
-					best_child_node = child_node
 					if alpha is None or best_child_value > alpha:
 						alpha = best_child_value
 			else:
 				if child_value is not None and (best_child_value is None or child_value < best_child_value):
 					best_child_value = child_value
-					best_child_node = child_node
 					if beta is None or best_child_value < beta:
 						beta = best_child_value
 			if alpha is not None and beta is not None and alpha >= beta:
 				break
-		return (best_child_node, best_child_value)
+		return best_child_value
 	
 	def get_heuristic_value_from_database(self, node):
 		if self.db is None:

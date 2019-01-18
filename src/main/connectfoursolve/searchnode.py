@@ -1,3 +1,5 @@
+import random
+
 from connectfoursolve.connectfour import ConnectFour
 from connectfoursolve.heuristic import Heuristic
 
@@ -21,9 +23,12 @@ class SearchNode:
 			return []
 		successors = []
 		for i in range(ConnectFour.width):
-			successor_cf = ConnectFour(self.cf)
-			if successor_cf.place_disc(i):
+			try:
+				successor_cf = ConnectFour(self.cf, i)
 				successors.append(SearchNode(successor_cf, self.heuristic_class))
+			except ValueError:
+				pass
+		random.shuffle(successors)
 		successors.sort(
 			key=lambda x: x.get_heuristic_value(),
 			reverse=self.cf.get_current_player() == 0

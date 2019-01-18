@@ -2,12 +2,15 @@ class ConnectFour:
 	width = 7
 	height = 6
 	
-	def __init__(self, parent=None):
+	def __init__(self, parent=None, move=None):
 		self.discs = [[None] * ConnectFour.height for x in range(ConnectFour.width)]
 		if parent is not None:
 			for x in range(ConnectFour.width):
 				for y in range(ConnectFour.height):
 					self.discs[x][y] = parent.discs[x][y]
+		self.move = move
+		if self.move is not None:
+			self.place_disc(self.move)
 	
 	def place_disc(self, column):
 		if column < 0 or column >= ConnectFour.width:
@@ -15,8 +18,8 @@ class ConnectFour:
 		for row in range(ConnectFour.height):
 			if self.discs[column][row] is None:
 				self.discs[column][row] = self.get_current_player()
-				return True
-		return False
+				return
+		raise ValueError("Column {} is full".format(column))
 	
 	def get_number_of_discs(self):
 		return len([
