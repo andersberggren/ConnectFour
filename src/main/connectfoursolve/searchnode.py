@@ -1,4 +1,5 @@
 from connectfoursolve.connectfour import ConnectFour
+from connectfoursolve.heuristic import Heuristic
 
 class SearchNode:
 	def __init__(self, cf, heuristic_class):
@@ -6,8 +7,9 @@ class SearchNode:
 		self.heuristic_class = heuristic_class
 		self.heuristic_value = None
 	
-	def is_terminal_node(self):
-		return self.cf.is_game_over()
+	def is_solved(self):
+		return abs(self.get_heuristic_value()) >= Heuristic.heuristic_value_win_threshold \
+				or self.cf.is_game_over()
 	
 	def get_heuristic_value(self):
 		if self.heuristic_value is None:

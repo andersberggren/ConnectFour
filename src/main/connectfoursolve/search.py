@@ -1,10 +1,9 @@
-from connectfoursolve.heuristic import Heuristic
-
-# SearchNode needs the following methods:
-# - is_terminal_node()
+# A node in alphabeta search needs the following methods:
+# - is_solved()  Returns True iff the node represents a terminal state, or the node is solved
+#                (i.e. it can determine the outcome from optimal play)
 # - get_heuristic_value()
 # - get_successors()
-# - get_state() Optional, to prevent creation/evaluation of equivalent nodes
+# - get_state() Returns a string representation of the node. Used when writing to database.
 class AlphaBeta:
 	def __init__(self, db_connection=None):
 		self.db = db_connection
@@ -18,8 +17,7 @@ class AlphaBeta:
 		if value_from_db is not None:
 			return (node, value_from_db)
 		heuristic_value = node.get_heuristic_value()
-		if abs(heuristic_value) >= Heuristic.heuristic_value_win_threshold \
-				or node.is_terminal_node():
+		if node.is_solved():
 			self.set_heuristic_value(node, heuristic_value)
 			return (node, heuristic_value)
 		if depth == 0:
